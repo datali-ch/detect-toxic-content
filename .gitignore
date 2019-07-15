@@ -1,0 +1,6 @@
+*.csv
+*.pyc
+*.xml
+*.iml
+*.h5
+venv
