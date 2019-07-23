@@ -1,19 +1,22 @@
 # -*- coding: utf-8 -*-
 
-from sklearn.metrics import (
-    log_loss,
-    accuracy_score,
-    f1_score,
-    precision_score,
-    recall_score,
-)
+from sklearn.metrics import log_loss, accuracy_score, f1_score, precision_score, recall_score
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_is_fitted
 from scipy import sparse
-from config import LOG_REGRESSION_SOLVER
+from config import LOG_REGRESSION_SOLVER, STOP_WORDS, STRIP_ACCENTS, MAX_FEATURES, MIN_DF, C
+from snippets import custom_tokenize, custom_preprocess
+
+
+def trainBagOfWords(X_train, X_test, y_train, y_test, labels):
+
+    model = NbSvmClassifier(C=C)
+    metrics_train, metrics_test, measures = fitModel(model, X_train, X_test, y_train, y_test, labels)
+    return metrics_train, metrics_test, measures
 
 
 def fitModel(model, X_train, X_test, y_train, y_test, labels):
@@ -46,11 +49,33 @@ def fitModel(model, X_train, X_test, y_train, y_test, labels):
     return metrics_train, metrics_test, MEASURES
 
 
+def calculateTFIDFscore(df, ngrams=(1,1)):
+
+    tfv = TfidfVectorizer(
+        ngram_range=ngrams,
+        tokenizer=custom_tokenize,
+        preprocessor=custom_preprocess,
+        strip_accents=STRIP_ACCENTS,
+        stop_words=STOP_WORDS,
+        analyzer="word",
+        max_features=MAX_FEATURES,
+        min_df=MIN_DF,
+    )
+
+    word_counts = tfv.fit_transform(df)
+    features = np.array(tfv.get_feature_names())
+
+    return word_counts, features
+
+
 class NbSvmClassifier(BaseEstimator, ClassifierMixin):
-    def __init__(self, C=1.0, dual=False, n_jobs=1):
+    # Credits to: Alex Sanchez
+    # https://www.kaggle.com/jhoward/nb-svm-strong-linear-baseline-eda-0-052-lb#261316
+
+    def __init__(self, C=1.0, n_jobs=-1, solver="lbfgs"):
         self.C = C
-        self.dual = dual
         self.n_jobs = n_jobs
+        self.solver = solver
 
     def predict(self, x):
         # Verify that model has been fit
@@ -67,13 +92,11 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
         y = y.values
         x, y = check_X_y(x, y, accept_sparse=True)
 
-        def pr(x, y_i, y):
+        def probability(x, y_i, y):
             p = x[y == y_i].sum(0)
             return (p + 1) / ((y == y_i).sum() + 1)
 
-        self._r = sparse.csr_matrix(np.log(pr(x, 1, y) / pr(x, 0, y)))
+        self._r = sparse.csr_matrix(np.log(probability(x, 1, y) / probability(x, 0, y)))
         x_nb = x.multiply(self._r)
-        self._clf = LogisticRegression(
-            C=self.C, solver = 'lbfgs', max_iter=10000
-        ).fit(x_nb, y)
+        self._clf = LogisticRegression(C=self.C, solver=self.solver, n_jobs=self.n_jobs).fit(x_nb, y)
         return self

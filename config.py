@@ -1,7 +1,17 @@
 # -*- coding: utf-8 -*-
 
-# Optimizer used in logistic regression
-LOG_REGRESSION_SOLVER = "lbfgs"
+# Data loading
+TEST_SIZE = 0.2
+
+# Parameters for TfidfVectorizer
+STOP_WORDS = 'english'
+STRIP_ACCENTS = 'unicode'
+MAX_FEATURES = 10000
+MIN_DF = 1
+
+# Parameters for logistic regression
+LOG_REGRESSION_SOLVER = "lbfgs" # Optimizer
+C = 4                           # Penalty
 
 # Tokens generated in text cleaning
 DIGIT_TOKEN = "DIGIT"
