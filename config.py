@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
+import nltk
+
+# Labels
+CONTENT_LABEL = "comment_text"
+UNIQUE_ID = "id"
+TOXIC_LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
 # Data loading
+DATA_FILE = 'data/train.csv'
 TEST_SIZE = 0.2
 
 # Parameters for TfidfVectorizer
-STOP_WORDS = 'english'
+STOP_WORDS = set(nltk.corpus.stopwords.words("english"))
 STRIP_ACCENTS = 'unicode'
 MAX_FEATURES = 10000
 MIN_DF = 1
