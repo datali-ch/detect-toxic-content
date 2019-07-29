@@ -2,25 +2,31 @@
 import nltk
 
 # Labels
-CONTENT_LABEL = "comment_text"
+CONTENT = "comment_text"
 UNIQUE_ID = "id"
-TOXIC_LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
+LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
 # Data loading
-DATA_FILE = 'data/train.csv'
+DATA_FILE = "data/train.csv"
 TEST_SIZE = 0.2
+PROCESSED_DATA_FILE = "data/train_clean.json"
 
 # Parameters for TfidfVectorizer
-STOP_WORDS = set(nltk.corpus.stopwords.words("english"))
-STRIP_ACCENTS = 'unicode'
+STOP_WORDS = "english"
+STRIP_ACCENTS = "unicode"
 MAX_FEATURES = 10000
 MIN_DF = 1
 
 # Parameters for logistic regression
-LOG_REGRESSION_SOLVER = "lbfgs" # Optimizer
-C = 4                           # Penalty
+LOG_REGRESSION_SOLVER = "lbfgs"  # Optimizer
+C = 4  # Penalty
 
-# Tokens generated in text cleaning
+#
+LEMMATIZER = nltk.stem.wordnet.WordNetLemmatizer()
+PORTER = nltk.stem.PorterStemmer()
+TOKENIZER = nltk.tokenize.RegexpTokenizer(r"\w+[']\w*|\w+")
+
+# Tokens generated in text cleaning (beware, no special characters)
 DIGIT_TOKEN = "DIGIT"
 ORDER_TOKEN = "ORDER"
 SPAM_TOKEN = "SPAM"

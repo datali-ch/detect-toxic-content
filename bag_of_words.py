@@ -1,21 +1,37 @@
 # -*- coding: utf-8 -*-
 
-from sklearn.metrics import log_loss, accuracy_score, f1_score, precision_score, recall_score
+from sklearn.metrics import (
+    log_loss,
+    accuracy_score,
+    f1_score,
+    precision_score,
+    recall_score,
+)
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 import numpy as np
+import nltk
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.validation import check_X_y, check_is_fitted
-from scipy import sparse
-from config import LOG_REGRESSION_SOLVER, STOP_WORDS, STRIP_ACCENTS, MAX_FEATURES, MIN_DF, C
-from snippets import custom_tokenize, custom_preprocess
-
+import scipy
+from pandas import DataFrame
+from config import (
+    LOG_REGRESSION_SOLVER,
+    STOP_WORDS,
+    STRIP_ACCENTS,
+    MAX_FEATURES,
+    MIN_DF,
+    C,
+)
+from typing import List, Tuple
 
 def trainBagOfWords(X_train, X_test, y_train, y_test, labels):
 
     model = NbSvmClassifier(C=C)
-    metrics_train, metrics_test, measures = fitModel(model, X_train, X_test, y_train, y_test, labels)
+    metrics_train, metrics_test, measures = fitModel(
+        model, X_train, X_test, y_train, y_test, labels
+    )
     return metrics_train, metrics_test, measures
 
 
@@ -49,17 +65,34 @@ def fitModel(model, X_train, X_test, y_train, y_test, labels):
     return metrics_train, metrics_test, MEASURES
 
 
-def calculateTFIDFscore(df, ngrams=(1,1)):
+def dummy_fun(doc):
+    return doc
 
+def dummy_toc(doc):
+    return doc.split()
+
+def calculateTFIDFscore(df: DataFrame, ngrams: Tuple[int, int]=(1,1)) -> Tuple[scipy.sparse.csr_matrix, List[str]]:
+    """ Calculates Term Frequency - Inverse Document Frequency Score 
+
+        Args:
+            df:                               texts to score, one sample per row
+            ngrams:                           range of n-grams to include: (from, to). Default: unigrams   
+
+        Returns:
+            word_counts:                      term-document matrix [n_samples, n_features]
+            features:                         features corresponding to cols of word_counts
+    """
+    
     tfv = TfidfVectorizer(
         ngram_range=ngrams,
-        tokenizer=custom_tokenize,
-        preprocessor=custom_preprocess,
-        strip_accents=STRIP_ACCENTS,
+        lowercase=False,
         stop_words=STOP_WORDS,
+        strip_accents=STRIP_ACCENTS,
+        preprocessor = dummy_fun,
+        tokenizer = dummy_toc,
         analyzer="word",
         max_features=MAX_FEATURES,
-        min_df=MIN_DF,
+        min_df=MIN_DF,      
     )
 
     word_counts = tfv.fit_transform(df)
@@ -96,7 +129,9 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
             p = x[y == y_i].sum(0)
             return (p + 1) / ((y == y_i).sum() + 1)
 
-        self._r = sparse.csr_matrix(np.log(probability(x, 1, y) / probability(x, 0, y)))
+        self._r = scipy.sparse.csr_matrix(np.log(probability(x, 1, y) / probability(x, 0, y)))
         x_nb = x.multiply(self._r)
-        self._clf = LogisticRegression(C=self.C, solver=self.solver, n_jobs=self.n_jobs).fit(x_nb, y)
+        self._clf = LogisticRegression(
+            C=self.C, solver=self.solver, n_jobs=self.n_jobs
+        ).fit(x_nb, y)
         return self
