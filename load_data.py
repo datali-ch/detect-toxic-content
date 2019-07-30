@@ -41,7 +41,7 @@ def loadData(
     if os.path.exists(PROCESSED_DATA_FILE):
         data = loadProcessedData(PROCESSED_DATA_FILE)
     else:
-        data = pd.read_csv(file, nrows=1000)
+        data = pd.read_csv(file)
         if preprocess:
             data[CONTENT] = data[CONTENT].apply(
                 lambda x: cleanAndTokenize(x)
