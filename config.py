@@ -1,44 +1,65 @@
 # -*- coding: utf-8 -*-
 import nltk
-
-# Labels
-CONTENT = "comment_text"
-UNIQUE_ID = "id"
-LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
+import regex as re
 
 # Data loading
 DATA_FILE = "data/train.csv"
 TEST_SIZE = 0.2
 PROCESSED_DATA_FILE = "data/train_clean.json"
 
+# Data Labels
+CONTENT = "comment_text"
+UNIQUE_ID = "id"
+LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
+
+# Plotting parameters
+PRECISION = 1e4  
+
 # Parameters for TfidfVectorizer
-STOP_WORDS = "english"
+STOP_WORDS = set(nltk.corpus.stopwords.words('english'))
 STRIP_ACCENTS = "unicode"
 MAX_FEATURES = 10000
 MIN_DF = 1
+TFIDF_FILE = "data/word_counts.json"
 
 # Parameters for logistic regression
-LOG_REGRESSION_SOLVER = "lbfgs"  # Optimizer
-C = 4  # Penalty
+LOG_REGRESSION_SOLVER = "lbfgs"     # Optimizer
+C = 4                               # Inverse of regularization stregth
 
-#
+# Parameters for LDA model
+NUM_TOPICS = 15
+LDA_FILE = "data/topic_probabaility.json"
+
+# Text preprocessing
 LEMMATIZER = nltk.stem.wordnet.WordNetLemmatizer()
 PORTER = nltk.stem.PorterStemmer()
 TOKENIZER = nltk.tokenize.RegexpTokenizer(r"\w+[']\w*|\w+")
 
-# Tokens generated in text cleaning (beware, no special characters)
-DIGIT_TOKEN = "DIGIT"
-ORDER_TOKEN = "ORDER"
-SPAM_TOKEN = "SPAM"
-YEAR_TOKEN = "YEAR"
-SPAM_CHAR_LIMIT = (
-    50
-)  # Longest english word: 45 chars (pneumonoultramicroscopicsilicovolcanoconiosis)
-IP_TOKEN = "IP"
-URL_TOKEN = "URL"
+# Tokens generated in text cleaning.
+# Do not use any special characters
+re.DEFAULT_VERSION = re.VERSION1                # Version of regex used for patterns
+PATTERNS = [[] for i in range(6)]
+PATTERNS[0] = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
+PATTERNS[1] = re.compile("http://.*com")
+PATTERNS[2] = re.compile("\d[19|20]\d{2}s?")
+PATTERNS[3] = re.compile("\d+(?:st|nd|rd|th)")
+PATTERNS[4] = re.compile("\d{1,3}([,]\d{3})*([.]\d+)*")
+PATTERNS[5] = re.compile("[\d]+")
 
-# https://drive.google.com/file/d/0B1yuv8YaUVlZZ1RzMFJmc1ZsQmM/view
-# Aphost lookup dict
+TOKENS = [[] for i in range(6)]
+TOKENS[0] = "IP"
+TOKENS[1] = "URL"
+TOKENS[2] = "YEAR"
+TOKENS[3] = "ORDER"
+TOKENS[4] = "DIGIT"
+TOKENS[5] = "DIGIT"
+
+SPAM_TOKEN = "SPAM"
+SPAM_CHAR_LIMIT = 50                # Longest english word: 45 chars
+
+
+# Aphostrophes dict
+# Credits: https://drive.google.com/file/d/0B1yuv8YaUVlZZ1RzMFJmc1ZsQmM/view
 APPO = {
     "aren't": "are not",
     "can't": "cannot",

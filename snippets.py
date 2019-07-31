@@ -1,19 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.utils.validation import check_X_y, check_is_fitted
-from sklearn.linear_model import LogisticRegression
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import (
-    log_loss,
-    accuracy_score,
-    f1_score,
-    precision_score,
-    recall_score,
-)
-
-from scipy import sparse
 import pandas as pd
 import seaborn as sns
 import numpy as np
@@ -23,23 +9,30 @@ import upsetplot
 from dython.nominal import theils_u
 import random
 import math
-import nltk
 import re
-from config import (
-    APPO,
-    DIGIT_TOKEN,
-    ORDER_TOKEN,
-    SPAM_TOKEN,
-    YEAR_TOKEN,
-    SPAM_CHAR_LIMIT,
-    IP_TOKEN,
-    URL_TOKEN,
-)
+from pandas import DataFrame
+from typing import List, Tuple
+from numpy import ndarray
+from config import PRECISION
 
 
 def getTopWordsByCategory(
-    df, categories, word_counts, features, num_words=10, aggregate=False
-):
+    df: DataFrame, categories: List[str], word_counts: ndarray, features: List[str], n:int=10, aggregate:bool=False
+) -> Tuple[List[str], List[int]]:
+    """ Given word counts, returns top words in each class
+
+        Args:
+            df (N,M):                         M categories labels over N examples, one-hot encoding
+            categories (1,M)                  names of M categories
+            word_count (N,P):                 count of P words over N examples
+            features (1,P):                   P words    
+            n:                                number of top words to return
+            aggregate:                        indicates if words should be counted altogether or by category. True for aggregated results, false otherwise
+
+        Returns:
+            words (n, M) or (n, 1):           top n words
+            counts (n, M) or (n, 1):          count of words in all df
+    """
 
     if aggregate:
         items = 1
@@ -58,14 +51,24 @@ def getTopWordsByCategory(
 
         curr_counts = word_counts[rows2take, :].toarray().mean(axis=0)
 
-        idx2take = np.argsort(-curr_counts)[:num_words]
+        idx2take = np.argsort(-curr_counts)[:n]
         counts[i] = curr_counts[idx2take]
         words[i] = features[idx2take]
 
     return words, counts
 
 
-def plotTopWordsByCategory(words, counts, categories):
+def plotTopWordsByCategory(words: List[str], counts: List[int], categories: List[str]) -> None:
+    """ Plot histograms of top words in each category
+
+        Args:
+            words (N, M):                     top N words over M categories
+            counts (N, M):                    count of words
+            categories (1,M):                 names of M categories
+
+        Returns:
+            None
+    """
 
     COLORS = sns.color_palette()
     ROWS = math.ceil(len(categories) / 2)
@@ -83,7 +86,20 @@ def plotTopWordsByCategory(words, counts, categories):
     plt.show()
 
 
-def plotTopWords(words, counts, label, color=None, show=True):
+def plotTopWords(words: List[str], counts: List[int], label: str, color:str=None, show:bool=True) -> None:
+    """ Plot histogram of top words
+
+        Args:
+            words (n, 1):                     top n words
+            counts (n, 1):                    count of words
+            label:                            plot label
+            color:                            plot color
+            show:                             indicates if plot should be displayed. True for display, false otherwise
+
+        Returns:
+            None
+    """
+
 
     if show:
         plt.figure(figsize=(18, 12))
@@ -97,10 +113,17 @@ def plotTopWords(words, counts, label, color=None, show=True):
         plt.show()
 
 
-def plotClassShares(labels, ratio):
+def plotClassShares(labels: List[str], ratio: List[float]) -> None:
+    """ Plot histogram of categories
+        Args:
+            labels:                         category names
+            ratio:                          share of category over all examples
+
+        Returns:
+            None
+    """
 
     plt.figure(figsize=(15, 6))
-    PRECISION = 1e4
     ax = sns.barplot(labels, ratio)
 
     plt.title("Share of different comment types", fontsize=20)
@@ -119,13 +142,23 @@ def plotClassShares(labels, ratio):
     plt.show()
 
 
-def printSampleComments(df, content_label, class_labels, num):
+def printSampleComments(df: DataFrame, content_label: str, class_labels: List[str], n: int) -> None:
+    """ Print sample comment
+        Args:
+            df:                         dataframe with text data
+            content_label:              name of column with text data
+            class_labels:               name of columns with labels, one-hot encoding
+            n:                          number of comments to print
+
+        Returns:
+            None
+    """
 
     for label in class_labels:
 
         subset = df[content_label][df[label] == 1]
         num_cases = len(subset.index)
-        iters = min(num_cases, num)
+        iters = min(num_cases, n)
 
         print(label.upper() + ": ")
         for comment in range(iters):
@@ -137,7 +170,16 @@ def printSampleComments(df, content_label, class_labels, num):
         print("")
 
 
-def plotSetIntersections(df, labels, unique_id):
+def plotSetIntersections(df: DataFrame, labels: List[str], unique_id: str) -> None:
+    """ Plots sets size and intersection
+        Args:
+            df:                         dataframe with labels (one-hot encoding) and unique id
+            class_labels:               name of columns with labels, one-hot encoding
+            unique_id                   name of column with unique id
+
+        Returns:
+            None
+    """
 
     df_subset = df[labels + [unique_id]]
     counts = df_subset.astype(bool).groupby(labels).count()[unique_id]
@@ -146,10 +188,17 @@ def plotSetIntersections(df, labels, unique_id):
     plt.show()
 
 
-def calculateUncertanityCoeff(df, labels):
+def calculateUncertanityCoeff(df: DataFrame, labels: List[str]) -> List[List[float]]:
+    """Calculates Theil's U uncertainity coefficient. Implemented as in:
+        https://towardsdatascience.com/the-search-for-categorical-correlation-a1cf7f1888c9
 
-    # Theil's U uncertanity coefficient
-    # https://towardsdatascience.com/the-search-for-categorical-correlation-a1cf7f1888c9
+        Args:
+            df:                         dataframe one-hot encoding for M labels
+            labels (1,M):               name of columns with M labels, one-hot encoding
+
+        Returns:
+            uncertanity_coeff (M,M):    theil's uncertanity coefficient for labels
+    """
 
     uncertanity_coeff = [[0] * len(labels) for label in labels]
 
@@ -162,7 +211,16 @@ def calculateUncertanityCoeff(df, labels):
     return uncertanity_coeff
 
 
-def plotUncertanityCoeff(coeff, labels):
+def plotUncertanityCoeff(coeff: List[List[float]], labels: List[str]) -> None:
+    """ Plots uncertanity cofficient matrix
+
+        Args:
+            coeff (M,M):                Theil's U uncertanity coefficient for M classes
+            labels (1,M):               names of M classes
+
+        Returns:
+            None
+    """
 
     plt.figure(figsize=(10, 8))
     sns.heatmap(coeff, xticklabels=labels, yticklabels=labels, annot=True, square=True)
