@@ -13,18 +13,18 @@ UNIQUE_ID = "id"
 LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
 # Plotting parameters
-PRECISION = 1e4  
+PRECISION = 1e4
 
 # Parameters for TfidfVectorizer
-STOP_WORDS = set(nltk.corpus.stopwords.words('english'))
+STOP_WORDS = set(nltk.corpus.stopwords.words("english"))
 STRIP_ACCENTS = "unicode"
 MAX_FEATURES = 10000
 MIN_DF = 1
 TFIDF_FILE = "data/word_counts.json"
 
 # Parameters for logistic regression
-LOG_REGRESSION_SOLVER = "lbfgs"     # Optimizer
-C = 4                               # Inverse of regularization stregth
+LOG_REGRESSION_SOLVER = "lbfgs"  # Optimizer
+C = 4  # Inverse of regularization stregth
 
 # Parameters for LDA model
 NUM_TOPICS = 15
@@ -37,7 +37,7 @@ TOKENIZER = nltk.tokenize.RegexpTokenizer(r"\w+[']\w*|\w+")
 
 # Tokens generated in text cleaning.
 # Do not use any special characters
-re.DEFAULT_VERSION = re.VERSION1                # Version of regex used for patterns
+re.DEFAULT_VERSION = re.VERSION1  # Version of regex used for patterns
 PATTERNS = [[] for i in range(6)]
 PATTERNS[0] = re.compile("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}")
 PATTERNS[1] = re.compile("http://.*com")
@@ -55,7 +55,7 @@ TOKENS[4] = "DIGIT"
 TOKENS[5] = "DIGIT"
 
 SPAM_TOKEN = "SPAM"
-SPAM_CHAR_LIMIT = 50                # Longest english word: 45 chars
+SPAM_CHAR_LIMIT = 50  # Longest english word: 45 chars
 
 
 # Aphostrophes dict

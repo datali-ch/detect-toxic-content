@@ -57,7 +57,6 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
         check_is_fitted(self, ["_r", "_clf"])
         return self._clf.predict(x.multiply(self._r))
 
-
     def predict_proba(self, x: ndarray) -> ndarray:
         """ Given fitted model, predicts probability of label=1 for a set of features
             
@@ -70,7 +69,6 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
 
         check_is_fitted(self, ["_r", "_clf"])
         return self._clf.predict_proba(x.multiply(self._r))
-
 
     def fit(self, x: ndarray, y: ndarray) -> None:
         """ Given set of features, fits logistic regression classifier

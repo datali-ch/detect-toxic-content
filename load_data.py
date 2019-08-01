@@ -39,7 +39,7 @@ def loadData(
             data:                               df with comments and labels
     
     """
-    
+
     if os.path.exists(PROCESSED_DATA_FILE):
         data = loadProcessedData(PROCESSED_DATA_FILE)
     else:

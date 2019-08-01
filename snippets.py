@@ -17,7 +17,12 @@ from config import PRECISION
 
 
 def getTopWordsByCategory(
-    df: DataFrame, categories: List[str], word_counts: ndarray, features: List[str], n:int=10, aggregate:bool=False
+    df: DataFrame,
+    categories: List[str],
+    word_counts: ndarray,
+    features: List[str],
+    n: int = 10,
+    aggregate: bool = False,
 ) -> Tuple[List[str], List[int]]:
     """ Given word counts, returns top words in each class
 
@@ -58,7 +63,9 @@ def getTopWordsByCategory(
     return words, counts
 
 
-def plotTopWordsByCategory(words: List[str], counts: List[int], categories: List[str]) -> None:
+def plotTopWordsByCategory(
+    words: List[str], counts: List[int], categories: List[str]
+) -> None:
     """ Plot histograms of top words in each category
 
         Args:
@@ -86,7 +93,13 @@ def plotTopWordsByCategory(words: List[str], counts: List[int], categories: List
     plt.show()
 
 
-def plotTopWords(words: List[str], counts: List[int], label: str, color:str=None, show:bool=True) -> None:
+def plotTopWords(
+    words: List[str],
+    counts: List[int],
+    label: str,
+    color: str = None,
+    show: bool = True,
+) -> None:
     """ Plot histogram of top words
 
         Args:
@@ -99,7 +112,6 @@ def plotTopWords(words: List[str], counts: List[int], label: str, color:str=None
         Returns:
             None
     """
-
 
     if show:
         plt.figure(figsize=(18, 12))
@@ -142,7 +154,9 @@ def plotClassShares(labels: List[str], ratio: List[float]) -> None:
     plt.show()
 
 
-def printSampleComments(df: DataFrame, content_label: str, class_labels: List[str], n: int) -> None:
+def printSampleComments(
+    df: DataFrame, content_label: str, class_labels: List[str], n: int
+) -> None:
     """ Print sample comment
         Args:
             df:                         dataframe with text data
