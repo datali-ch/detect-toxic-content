@@ -70,9 +70,9 @@ def main(args: argparse.Namespace) -> None:
         model.fit(X_train, y_train, epochs=EPOCHS, batch_size=int(BATCH_SIZE), shuffle=True)
         y_pred = model.predict(X_test) > PREDICTION_THRESHOLD
 
-        metrics_test, measures = calculateModelMetrics(y_pred, y_train.values)
+        metrics_test, measures = calculateModelMetrics(y_pred, y_test.values)
 
-        print(model_name + "LSTM performance on test set")
+        print("LSTM performance on test set")
         print(pd.DataFrame(metrics_test, columns=LABELS, index=measures))
         print("")
 
@@ -81,9 +81,9 @@ def get_arg_parser():
     parser = argparse.ArgumentParser(description="This script addresses the problem of detecting toxic text content.")
 
     parser.add_argument("--save", action="store_true", help="Save model features")
-    parser.add_argument("--train-bag-of-words", type=bool, default=True, help="Fitting bag of words algorithm")
+    parser.add_argument("--train-bag-of-words", type=bool, default=False, help="Fitting bag of words algorithm")
     parser.add_argument("--train-topic-modeling", type=bool, default=False, help="Fitting topic modeling algorithm")
-    parser.add_argument("--train-lstm", type=bool, default=False, help="Fitting bag of words algorithm")
+    parser.add_argument("--train-lstm", type=bool, default=True, help="Fitting bag of words algorithm")
 
     return parser
 

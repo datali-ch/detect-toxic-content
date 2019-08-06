@@ -2,7 +2,7 @@ import numpy as np
 import os
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import Dense, Input, Dropout, LSTM, Activation
+from keras.layers import Dense, Input, Dropout, LSTM, Activation, CuDNNLSTM
 from config import (
     DATA_FILE,
     CONTENT,
@@ -46,9 +46,9 @@ def getSequenceModel(word2index: Dict, word2vec: Dict, num_categories: int) -> M
     embeddings = embedding_layer(sentence_indices)
 
     # LSTM, Dropout and activation layers
-    X = LSTM(LSTM_HIDDEN_STATE, return_sequences=True)(embeddings)
+    X = CuDNNLSTM(LSTM_HIDDEN_STATE, return_sequences=True)(embeddings)
     X = Dropout(rate=DROPOUT_RATE)(X)
-    X = LSTM(LSTM_HIDDEN_STATE, return_sequences=False)(X)
+    X = CuDNNLSTM(LSTM_HIDDEN_STATE, return_sequences=False)(X)
     X = Dropout(rate=DROPOUT_RATE)(X)
     X = Dense(num_categories, activation="sigmoid")(X)
     X = Activation("sigmoid")(X)
