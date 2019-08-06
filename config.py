@@ -12,23 +12,36 @@ CONTENT = "comment_text"
 UNIQUE_ID = "id"
 LABELS = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
-# Plotting parameters
+# Plotting
 PRECISION = 1e4
 
-# Parameters for TfidfVectorizer
+# TfidfVectorizer
 STOP_WORDS = set(nltk.corpus.stopwords.words("english"))
 STRIP_ACCENTS = "unicode"
 MAX_FEATURES = 10000
 MIN_DF = 1
 TFIDF_FILE = "data/word_counts.json"
 
-# Parameters for logistic regression
+# Logistic regression
 LOG_REGRESSION_SOLVER = "lbfgs"  # Optimizer
-C = 4  # Inverse of regularization stregth
+MAX_ITER = 100                   # Num of iterations
+C = 4                            # Inverse of regularization stregth
 
-# Parameters for LDA model
+# LDA model
 NUM_TOPICS = 15
 LDA_FILE = "data/topic_probabaility.json"
+
+# LSTM
+DROPOUT_RATE = 0.5
+EPOCHS = 1
+BATCH_SIZE = 32
+LSTM_HIDDEN_STATE = 64
+PREDICTION_THRESHOLD = 0.5
+
+# Word Embeddings
+GLOVE_FILE = "glove/glove.6B.50d.txt"
+MAX_WORDS = 2000
+MAX_SEQUENCE_LEN = 1000
 
 # Text preprocessing
 LEMMATIZER = nltk.stem.wordnet.WordNetLemmatizer()

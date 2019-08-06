@@ -3,16 +3,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 from pandas import DataFrame
-from config import (
-    STOP_WORDS,
-    STRIP_ACCENTS,
-    MAX_FEATURES,
-    MIN_DF,
-    C,
-    NUM_TOPICS,
-    TFIDF_FILE,
-    LDA_FILE,
-)
+from config import STOP_WORDS, STRIP_ACCENTS, MAX_FEATURES, MIN_DF, C, NUM_TOPICS, TFIDF_FILE, LDA_FILE
 import gensim
 from gensim.models import LdaModel
 from gensim.corpora import Dictionary
@@ -50,14 +41,12 @@ def split_words(doc: str, remove_stopwords: bool = False) -> List[str]:
     return doc
 
 
-def calculateTFIDFscore(
-    df: DataFrame, ngrams: Tuple[int, int] = (1, 1)
-) -> Tuple[csr_matrix, List[str]]:
-    """ Calculates Term Frequency - Inverse Document Frequency Score 
+def calculateTFIDFscore(df: DataFrame, ngrams: Tuple[int, int] = (1, 1)) -> Tuple[csr_matrix, List[str]]:
+    """ Calculates Term Frequency - Inverse Document Frequency Score
 
         Args:
             df:                               texts to score, one sample per row
-            ngrams:                           range of n-grams to include: (from, to). Default: unigrams   
+            ngrams:                           range of n-grams to include: (from, to). Default: unigrams
 
         Returns:
             word_counts:                      term-document matrix [n_samples, n_features]
@@ -89,7 +78,7 @@ def calculateTopicProbability(df: DataFrame) -> Tuple[csr_matrix, None]:
 
         Returns:
             topic_probability:                topic (probability) distribution for texts in df
-            features:                         dummy field for compatibility with calculateTFIDFscore 
+            features:                         dummy field for compatibility with calculateTFIDFscore
     """
 
     tokenized_text = df.apply(lambda x: split_words(x, remove_stopwords=False))
@@ -106,9 +95,7 @@ def calculateTopicProbability(df: DataFrame) -> Tuple[csr_matrix, None]:
     return topic_probability.transpose(), features
 
 
-def saveSparseMatrix(
-    file: str, matrix: csr_matrix, colnames: Union[List[str], None] = None
-) -> None:
+def saveSparseMatrix(file: str, matrix: csr_matrix, colnames: Union[List[str], None] = None) -> None:
     """ Save sparse matrix to json file
 
         Args:

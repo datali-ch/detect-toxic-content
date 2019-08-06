@@ -1,7 +1,5 @@
 import pandas as pd
 import math
-import nltk
-import regex as re
 import string
 import json
 import os.path
@@ -23,9 +21,7 @@ from config import (
 )
 
 
-def loadData(
-    file: str, preprocess: bool = True, save_to_file: bool = True
-) -> pd.DataFrame:
+def loadData(file: str, preprocess: bool = True, save_to_file: bool = True) -> pd.DataFrame:
     """ Load train.csv dataset from https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge
 
         Args:
@@ -37,7 +33,7 @@ def loadData(
 
         Returns:
             data:                               df with comments and labels
-    
+
     """
 
     if os.path.exists(PROCESSED_DATA_FILE):
@@ -121,7 +117,7 @@ def loadProcessedData(file: str) -> DataFrame:
 
         Args:
             file:                               file name where data is stored, full or relative path
-        
+
         Returns:
             df:                                 dataframe stored in file
     """
