@@ -2,9 +2,11 @@ import numpy as np
 import os
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import Dense, Input, Dropout, LSTM, Activation, CuDNNLSTM
+from keras.layers import Dense, Input, Dropout, LSTM, Activation, CuDNNLSTM, Embedding
+from keras.models import Model
 from config import (
     DATA_FILE,
+    DENSE_UNITS,
     CONTENT,
     LABELS,
     DROPOUT_RATE,
@@ -19,8 +21,6 @@ from config import (
     PREDICTION_THRESHOLD,
 )
 from load_data import loadData
-from keras.layers import Embedding, Input
-from keras.models import Model
 from typing import Dict, List, Tuple
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
@@ -50,8 +50,9 @@ def getSequenceModel(word2index: Dict, word2vec: Dict, num_categories: int) -> M
     X = Dropout(rate=DROPOUT_RATE)(X)
     X = CuDNNLSTM(LSTM_HIDDEN_STATE, return_sequences=False)(X)
     X = Dropout(rate=DROPOUT_RATE)(X)
+    X = Dense(DENSE_UNITS, activation="relu")(X)
+    X = Dropout(rate=DROPOUT_RATE)(X)
     X = Dense(num_categories, activation="sigmoid")(X)
-    X = Activation("sigmoid")(X)
     model = Model(inputs=sentence_indices, outputs=X)
     model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["accuracy"])
 
@@ -70,7 +71,7 @@ def getWordVectors(df: DataFrame) -> Tuple[List[int], Dict]:
     """
 
     tokenizer = Tokenizer(num_words=MAX_WORDS)
-    tokenizer.fit_on_texts(df)
+    tokenizer.fit_on_texts(list(df))
     word2index = tokenizer.word_index
     sequences = tokenizer.texts_to_sequences(df)
     data = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LEN)

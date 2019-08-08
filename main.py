@@ -18,8 +18,9 @@ from config import (
     EPOCHS,
     BATCH_SIZE,
     PREDICTION_THRESHOLD,
+    PATIENCE
 )
-
+from keras.callbacks import EarlyStopping
 from features_engineering import calculateTFIDFscore, calculateTopicProbability, loadSparseMatrix, saveSparseMatrix
 from nb_svm import fitModel, NbSvmClassifier
 from lstm import loadGloveEmbeddings, getWordVectors, getSequenceModel
@@ -52,7 +53,7 @@ def main(args: argparse.Namespace) -> None:
             if args.save:
                 saveSparseMatrix(file, features, colnames)
 
-        X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS], test_size=TEST_SIZE, random_state=123)
+        X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS].values, test_size=TEST_SIZE, random_state=123)
         model = NbSvmClassifier(C=C)
         _, metrics_test, measures = fitModel(model, X_train, X_test, y_train, y_test, LABELS)
 
@@ -66,11 +67,13 @@ def main(args: argparse.Namespace) -> None:
         features, word2index = getWordVectors(df[CONTENT])
         model = getSequenceModel(word2index, word2vec, len(LABELS))
 
-        X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS], test_size=TEST_SIZE, random_state=123)
-        model.fit(X_train, y_train, epochs=EPOCHS, batch_size=int(BATCH_SIZE), shuffle=True)
-        y_pred = model.predict(X_test) > PREDICTION_THRESHOLD
+        X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS].values, test_size=TEST_SIZE, random_state=123)
+        earlyStop=EarlyStopping(monitor="val_loss", verbose=0, patience=PATIENCE, restore_best_weights=True)
 
-        metrics_test, measures = calculateModelMetrics(y_pred, y_test.values)
+        model.fit(X_train, y_train, epochs=1, batch_size=int(BATCH_SIZE), callbacks=[earlyStop], shuffle=True)
+        y_pred = (model.predict(X_test, batch_size=int(BATCH_SIZE)) > PREDICTION_THRESHOLD).astype(int)
+
+        metrics_test, measures = calculateModelMetrics(y_pred, y_test)
 
         print("LSTM performance on test set")
         print(pd.DataFrame(metrics_test, columns=LABELS, index=measures))

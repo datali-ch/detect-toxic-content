@@ -25,14 +25,15 @@ def return_self(doc: List[str]) -> List[str]:
     return doc
 
 
-def split_words(doc: str, remove_stopwords: bool = False) -> List[str]:
+def split_words(doc: str, remove_stopwords: bool = True) -> List[str]:
     """ Tokenizes a string using whitespace
 
         Args:
-            df:                               texts to score, one sample per row
+            doc:                            string to tokenize
+            remove_stopwords:               indicates if stopwords should be removed. True for removal, false otherwise
 
         Returns:
-            topic_probability:                topic probability distribution
+            doc:                            tokenized text
     """
 
     doc = doc.split()

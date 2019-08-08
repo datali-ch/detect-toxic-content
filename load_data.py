@@ -83,9 +83,9 @@ def cleanAndTokenize(comment: str) -> List[str]:
 
         if words[idx] in APPO:
             words[idx] = APPO[words[idx]]
-        elif words[idx] in STOP_WORDS:
-            del words[idx]
-            continue
+#        elif words[idx] in STOP_WORDS:
+#            del words[idx]
+#            continue
         elif words[idx] not in tokens:
             if len(words[idx]) > SPAM_CHAR_LIMIT:
                 words[idx] = SPAM_TOKEN

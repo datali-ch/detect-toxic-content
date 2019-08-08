@@ -30,7 +30,7 @@ def getTopWordsByCategory(
             df (N,M):                         M categories labels over N examples, one-hot encoding
             categories (1,M)                  names of M categories
             word_count (N,P):                 count of P words over N examples
-            features (1,P):                   P words    
+            features (1,P):                   P words
             n:                                number of top words to return
             aggregate:                        indicates if words should be counted altogether or by category. True for aggregated results, false otherwise
 
@@ -58,14 +58,12 @@ def getTopWordsByCategory(
 
         idx2take = np.argsort(-curr_counts)[:n]
         counts[i] = curr_counts[idx2take]
-        words[i] = features[idx2take]
+        words[i] = [features[j] for j in idx2take]
 
     return words, counts
 
 
-def plotTopWordsByCategory(
-    words: List[str], counts: List[int], categories: List[str]
-) -> None:
+def plotTopWordsByCategory(words: List[str], counts: List[int], categories: List[str]) -> None:
     """ Plot histograms of top words in each category
 
         Args:
@@ -93,13 +91,7 @@ def plotTopWordsByCategory(
     plt.show()
 
 
-def plotTopWords(
-    words: List[str],
-    counts: List[int],
-    label: str,
-    color: str = None,
-    show: bool = True,
-) -> None:
+def plotTopWords(words: List[str], counts: List[int], label: str, color: str = None, show: bool = True) -> None:
     """ Plot histogram of top words
 
         Args:
@@ -154,9 +146,7 @@ def plotClassShares(labels: List[str], ratio: List[float]) -> None:
     plt.show()
 
 
-def printSampleComments(
-    df: DataFrame, content_label: str, class_labels: List[str], n: int
-) -> None:
+def printSampleComments(df: DataFrame, content_label: str, class_labels: List[str], n: int) -> None:
     """ Print sample comment
         Args:
             df:                         dataframe with text data
@@ -218,9 +208,7 @@ def calculateUncertanityCoeff(df: DataFrame, labels: List[str]) -> List[List[flo
 
     for label_1 in range(len(labels)):
         for label_2 in range(len(labels)):
-            uncertanity_coeff[label_1][label_2] = theils_u(
-                df[labels[label_1]], df[labels[label_2]]
-            )
+            uncertanity_coeff[label_1][label_2] = theils_u(df[labels[label_1]], df[labels[label_2]])
 
     return uncertanity_coeff
 

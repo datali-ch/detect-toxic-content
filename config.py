@@ -33,14 +33,16 @@ LDA_FILE = "data/topic_probabaility.json"
 
 # LSTM
 DROPOUT_RATE = 0.5
-EPOCHS = 1
-BATCH_SIZE = 32
-LSTM_HIDDEN_STATE = 64
-PREDICTION_THRESHOLD = 0.5
+EPOCHS = 50
+BATCH_SIZE = 512
+LSTM_HIDDEN_STATE = 128
+DENSE_UNITS = 50
+PREDICTION_THRESHOLD = 0.25
+PATIENCE = 2                    # No epochs for early stopping
 
 # Word Embeddings
 GLOVE_FILE = "glove/glove.6B.50d.txt"
-MAX_WORDS = 2000
+MAX_WORDS = 20000
 MAX_SEQUENCE_LEN = 1000
 
 # Text preprocessing
