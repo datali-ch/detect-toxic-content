@@ -51,11 +51,17 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
                 x (N,M):          M features over N examples
 
             Returns:
-                _ (N,1):          predicted labels over N examples
+                output (N,K):     predicted labels over N examples and K classes (one hot encoding)
         """
 
         check_is_fitted(self, ["_r", "_clf"])
-        return self._clf.predict(x.multiply(self._r))
+        x = csr_matrix(x)
+        output = np.zeros((x.shape[0], len(self._clf)))
+
+        for i in range(len(self._clf)):
+            output[:,i] = self._clf[i].predict(x.multiply(self._r[i,:]))
+
+        return output
 
     def predict_proba(self, x: ndarray) -> ndarray:
         """ Given fitted model, predicts probability of label=1 for a set of features
@@ -64,46 +70,61 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
                 x (N,M):          M features over N examples
 
             Returns:
-                _ (N,1):          probability of label=1 over N examples
+                output (N,K):     probability of label=1 over N examples and K classes
         """
 
         check_is_fitted(self, ["_r", "_clf"])
-        return self._clf.predict_proba(x.multiply(self._r))
+        x = csr_matrix(x)
+        output = np.zeros((x.shape[0], len(self._clf)))
+
+        for i in range(len(self._clf)):
+            output[:,i] = self._clf[i].predict_proba(x.multiply(self._r[i,:]))
+
+        return output
+
 
     def fit(self, x: ndarray, y: ndarray) -> None:
         """ Given set of features, fits logistic regression classifier
 
             Args:
                 x (N,M):          M features over N examples
-                y (N,1):          labels [0,1] over N examples
+                y (N,K):          labels for K classes, one-hot encoding
 
             Returns:
-                None
+                self
         """
 
-        y = y.values
-        x, y = check_X_y(x, y, accept_sparse=True)
+        x, y = check_X_y(x, y, accept_sparse=True, multi_output=True)
 
         def probability(x: ndarray, y_i: int, y: ndarray) -> float:
             """ Given set of features and labels, calculates probability of given label
 
                 Args:
-                    x (N,M):          M features over N examples
-                    y_i:              label for which probability is returned
-                    y (N,1):          labels [0,1] over N examples
+                    x (N,M):                M features over N examples
+                    y_i:                    label for which probability is returned
+                    y (N,K):                labels for K classes, one-hot encoding
 
                 Returns:
-                    None
+                    probabilities (M,K)     probabilities of label y_i
             """
 
-            p = x[y == y_i].sum(0)
-            return (p + 1) / ((y == y_i).sum() + 1)
+            probabilities = np.zeros((y.shape[1], x.shape[1]))
+            for i in range(y.shape[1]):
+                ind2take = y[:,i] == y_i
+                probabilities[i,:] = (x[ind2take].sum(0) + 1) / (ind2take.sum() + 1)
+
+            return probabilities
 
         self._r = csr_matrix(np.log(probability(x, 1, y) / probability(x, 0, y)))
-        x_nb = x.multiply(self._r)
-        self._clf = LogisticRegression(
-            C=self.C, solver=self.solver, n_jobs=self.n_jobs, max_iter=MAX_ITER
-        ).fit(x_nb, y)
+        self._clf = [0]*y.shape[1]
+        classifier = LogisticRegression(C=self.C, solver=self.solver, n_jobs=self.n_jobs, max_iter=MAX_ITER)
+        x = csr_matrix(x)
+
+        for i in range(y.shape[1]):
+
+            x_nb = x.multiply(self._r[i,:])
+            self._clf[i] = classifier.fit(x_nb, y[:,i])
+
         return self
 
 

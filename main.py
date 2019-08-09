@@ -55,7 +55,9 @@ def main(args: argparse.Namespace) -> None:
 
         X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS].values, test_size=TEST_SIZE, random_state=123)
         model = NbSvmClassifier(C=C)
-        _, metrics_test, measures = fitModel(model, X_train, X_test, y_train, y_test, LABELS)
+        model.fit(X_train, y_train)
+        labels = model.predict(X_test, y_test)
+         _, metrics_test, measures = fitModel(model, X_train, X_test, y_train, y_test, LABELS)
 
         print(model_name + " performance on test set")
         print(pd.DataFrame(metrics_test, columns=LABELS, index=measures))
