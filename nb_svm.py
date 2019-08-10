@@ -128,46 +128,6 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
         return self
 
 
-def fitModel(
-    model: NbSvmClassifier,
-    X_train: FEATURES_FORMAT,
-    X_test: FEATURES_FORMAT,
-    y_train: DataFrame,
-    y_test: DataFrame,
-    labels: List[str],
-) -> Tuple[List[List[float]], List[List[float]], List[str]]:
-    """ Fits multiclass classification model using one-vs-all method
-
-        Args:
-            model:                             Model for binary classification
-            X_train (N,M):                     features for training set. N examples, M features
-            X_test  (K,L):                     features for test set. K examples, L features
-            y_train (N,P):                     labels for training_set (one-hot encoding: N examples, P labels)
-            y_test  (K,P):                     labels for test_set     (one-hot encoding: K examples, P labels)
-            labels  (1,P):                     names of P features
-
-        Returns:
-            metrics_train (4, P):              Accuracy, F1 score, Precision and Recall for predicitions on training set
-            metrics_test  (4, P):              Accuracy, F1 score, Precision and Recall for predicitions on test set
-            MEASURES      (1, 4):              names of metrics returned
-    """
-
-    pred_train = np.zeros((X_train.shape[0], len(labels)))
-    pred_test = np.zeros((X_test.shape[0], len(labels)))
-
-    # Fits one variable at a time
-    for i, label in enumerate(labels):
-
-        model.fit(X_train, y_train[label])
-        pred_test[:, i] = model.predict(X_test)
-        pred_train[:, i] = model.predict(X_train)
-
-    metrics_train, MEASURES = calculateModelMetrics(pred_train, y_train[labels].values)
-    metrics_test, _ = calculateModelMetrics(pred_test, y_test[labels].values)
-
-    return metrics_train, metrics_test, MEASURES
-
-
 def calculateModelMetrics(y_pred: ndarray, y_true: ndarray) -> List[List[float]]:
     """ Calculates accuracy, F1 score, precision and recall for multi-label classification
 

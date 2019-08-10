@@ -56,8 +56,8 @@ def main(args: argparse.Namespace) -> None:
         X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS].values, test_size=TEST_SIZE, random_state=123)
         model = NbSvmClassifier(C=C)
         model.fit(X_train, y_train)
-        labels = model.predict(X_test, y_test)
-         _, metrics_test, measures = fitModel(model, X_train, X_test, y_train, y_test, LABELS)
+        y_pred = model.predict(X_test)
+        metrics_test, measures = calculateModelMetrics(y_pred, y_test)
 
         print(model_name + " performance on test set")
         print(pd.DataFrame(metrics_test, columns=LABELS, index=measures))
@@ -87,8 +87,8 @@ def get_arg_parser():
 
     parser.add_argument("--save", action="store_true", help="Save model features")
     parser.add_argument("--train-bag-of-words", type=bool, default=False, help="Fitting bag of words algorithm")
-    parser.add_argument("--train-topic-modeling", type=bool, default=False, help="Fitting topic modeling algorithm")
-    parser.add_argument("--train-lstm", type=bool, default=True, help="Fitting bag of words algorithm")
+    parser.add_argument("--train-topic-modeling", type=bool, default=True, help="Fitting topic modeling algorithm")
+    parser.add_argument("--train-lstm", type=bool, default=False, help="Fitting bag of words algorithm")
 
     return parser
 
