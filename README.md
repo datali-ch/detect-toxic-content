@@ -1,5 +1,4 @@
 # Detect Toxic Content
-Use NLP to detect abusive content
 
 Discussing things you care about can be difficult. The threat of abuse and harassment online means that many people stop expressing themselves and give up on seeking different opinions. Platforms struggle to effectively facilitate conversations, leading many communities to limit or completely shut down user comments.
 
@@ -13,9 +12,9 @@ SETUP:
 * Install packages from requirements.txt
 * Run script from command line:
 ```
-python main.py --choose-model=YOUR_MODEL
+python main.py --choose-model=MODEL
 ```
-where YOUR_MODEL is
+where MODEL is
 1. for Bag of Words
 2. for Latent Dirichlet Allocation
 3. for Long Short-Term Memory
