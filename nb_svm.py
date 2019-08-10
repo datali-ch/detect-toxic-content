@@ -98,12 +98,110 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
 
             p = x[y == y_i].sum(0)
             return (p + 1) / ((y == y_i).sum() + 1)
+        self._r = np.log(probability(x, 1, y) / probability(x, 0, y))
+        r = np.ravel(self._r)
+        x_nb = np.multiply(x, r)
 
-        self._r = csr_matrix(np.log(probability(x, 1, y) / probability(x, 0, y)))
-        x_nb = x.multiply(self._r)
         self._clf = LogisticRegression(
             C=self.C, solver=self.solver, n_jobs=self.n_jobs, max_iter=MAX_ITER
         ).fit(x_nb, y)
+        return self
+
+
+class NbSvmMultilabel(BaseEstimator, ClassifierMixin):
+    # Navie Bayes - Support Vector Machines Classifier
+    # This implementation uses Logistic Regression instead of SVM, which produces nearly identical outcomes
+    #
+    # Credits to: Alex Sanchez
+    # https://www.kaggle.com/jhoward/nb-svm-strong-linear-baseline-eda-0-052-lb#261316
+
+    def __init__(
+        self, C: float = 1.0, n_jobs: int = -1, solver: str = LOG_REGRESSION_SOLVER
+    ) -> None:
+        """ Initialize NB-SVM Classifier
+            Args:
+                C:          inverse of regularization strength
+                n_jobs:     number of CPU cores used when parallelizing over classes. -1 for all processors
+                solver:     algorithm to use in the optimization problem. Allowed values: ‘newton-cg’, ‘lbfgs’, ‘liblinear’, ‘sag’, ‘saga’}
+            Returns:
+                None
+        """
+
+        self.C = C
+        self.n_jobs = n_jobs
+        self.solver = solver
+
+    def predict(self, x: ndarray) -> ndarray:
+        """ Given fitted model, predicts label [0,1] for a set of features
+            Args:
+                x (N,M):          M features over N examples
+            Returns:
+                output (N,K):     predicted labels over N examples and K classes (one hot encoding)
+        """
+
+        check_is_fitted(self, ["_r", "_clf"])
+        x = csr_matrix(x)
+        output = np.zeros((x.shape[0], len(self._clf)))
+
+        for i in range(len(self._clf)):
+            output[:,i] = self._clf[i].predict(x.multiply(self._r[i,:]))
+
+        return output
+
+    def predict_proba(self, x: ndarray) -> ndarray:
+        """ Given fitted model, predicts probability of label=1 for a set of features
+            Args:
+                x (N,M):          M features over N examples
+            Returns:
+                output (N,K):     probability of label=1 over N examples and K classes
+        """
+
+        check_is_fitted(self, ["_r", "_clf"])
+        x = csr_matrix(x)
+        output = np.zeros((x.shape[0], len(self._clf)))
+
+        for i in range(len(self._clf)):
+            output[:,i] = self._clf[i].predict_proba(x.multiply(self._r[i,:]))
+
+        return output
+
+
+    def fit(self, x: ndarray, y: ndarray) -> None:
+        """ Given set of features, fits logistic regression classifier
+            Args:
+                x (N,M):          M features over N examples
+                y (N,K):          labels for K classes, one-hot encoding
+            Returns:
+                self
+        """
+
+        x, y = check_X_y(x, y, accept_sparse=True, multi_output=True)
+
+        def probability(x: ndarray, y_i: int, y: ndarray) -> float:
+            """ Given set of features and labels, calculates probability of given label
+                Args:
+                    x (N,M):                M features over N examples
+                    y_i:                    label for which probability is returned
+                    y (N,K):                labels for K classes, one-hot encoding
+                Returns:
+                    probabilities (M,K)     probabilities of label y_i
+            """
+
+            probabilities = np.zeros((y.shape[1], x.shape[1]))
+            for i in range(y.shape[1]):
+                ind2take = y[:,i] == y_i
+                probabilities[i,:] = (x[ind2take].sum(0) + 1) / (ind2take.sum() + 1)
+
+            return probabilities
+
+        self._r = np.log(probability(x, 1, y) / probability(x, 0, y))
+        self._clf = [[0] for i in range(y.shape[1])]
+
+        for i in range(y.shape[1]):
+
+            x_nb = np.multiply(x, np.ravel(self._r[i,:]))
+            self._clf[i] = LogisticRegression(C=self.C, solver=self.solver, n_jobs=self.n_jobs, max_iter=MAX_ITER).fit(x_nb, y[:,i])
+
         return self
 
 

@@ -40,7 +40,7 @@ def loadData(file: str, preprocess: bool = True, save_to_file: bool = True) -> p
     if os.path.exists(PROCESSED_DATA_FILE):
         data = loadProcessedData(PROCESSED_DATA_FILE)
     else:
-        data = pd.read_csv(file)
+        data = pd.read_csv(file, nrows=2500)
         if preprocess:
             data[CONTENT] = data[CONTENT].apply(lambda x: cleanAndTokenize(x))
         if save_to_file:

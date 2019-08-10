@@ -53,7 +53,7 @@ def main(args: argparse.Namespace) -> None:
             if args.save:
                 saveSparseMatrix(file, features, colnames)
 
-        X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS].values, test_size=TEST_SIZE, random_state=123)
+        X_train, X_test, y_train, y_test = train_test_split(features, df[LABELS], test_size=TEST_SIZE, random_state=123)
         model = NbSvmClassifier(C=C)
         _, metrics_test, measures = fitModel(model, X_train, X_test, y_train, y_test, LABELS)
 
@@ -84,9 +84,9 @@ def get_arg_parser():
     parser = argparse.ArgumentParser(description="This script addresses the problem of detecting toxic text content.")
 
     parser.add_argument("--save", action="store_true", help="Save model features")
-    parser.add_argument("--train-bag-of-words", type=bool, default=False, help="Fitting bag of words algorithm")
+    parser.add_argument("--train-bag-of-words", type=bool, default=True, help="Fitting bag of words algorithm")
     parser.add_argument("--train-topic-modeling", type=bool, default=False, help="Fitting topic modeling algorithm")
-    parser.add_argument("--train-lstm", type=bool, default=True, help="Fitting bag of words algorithm")
+    parser.add_argument("--train-lstm", type=bool, default=False, help="Fitting bag of words algorithm")
 
     return parser
 
