@@ -10,7 +10,11 @@ SETUP:
 * Download GloVe embeddings from http://nlp.stanford.edu/data/glove.6B.zip and unpack them
 * Parametrize above data files (DATA_FILE, GLOVE_FILE) in config.py
 * Install packages from requirements.txt
-* Run script from command line:
+* To better understand the data, have a look at exploratory data analysis. In command line:
+```
+jupyter notebook exlopratory_data_analysis.ipynb
+```
+* To fit models, run main script from command line:
 ```
 python main.py --choose-model=MODEL
 ```
