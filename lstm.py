@@ -20,7 +20,7 @@ from config import (
     MAX_SEQUENCE_LEN,
     PREDICTION_THRESHOLD,
 )
-from load_data import loadData
+from data_loading import loadData
 from typing import Dict, List, Tuple
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split

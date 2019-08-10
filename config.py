@@ -24,8 +24,8 @@ TFIDF_FILE = "data/word_counts.json"
 
 # Logistic regression
 LOG_REGRESSION_SOLVER = "lbfgs"  # Optimizer
-MAX_ITER = 100                   # Num of iterations
-C = 4                            # Inverse of regularization stregth
+MAX_ITER = 100  # Num of iterations
+C = 4  # Inverse of regularization stregth
 
 # LDA model
 NUM_TOPICS = 15
@@ -38,7 +38,7 @@ BATCH_SIZE = 512
 LSTM_HIDDEN_STATE = 128
 DENSE_UNITS = 50
 PREDICTION_THRESHOLD = 0.25
-PATIENCE = 2                    # No epochs for early stopping
+PATIENCE = 3                  # Number of epochs for early stopping
 
 # Word Embeddings
 GLOVE_FILE = "glove/glove.6B.50d.txt"

@@ -117,13 +117,12 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
 
         self._r = csr_matrix(np.log(probability(x, 1, y) / probability(x, 0, y)))
         self._clf = [0]*y.shape[1]
-        classifier = LogisticRegression(C=self.C, solver=self.solver, n_jobs=self.n_jobs, max_iter=MAX_ITER)
         x = csr_matrix(x)
 
         for i in range(y.shape[1]):
 
             x_nb = x.multiply(self._r[i,:])
-            self._clf[i] = classifier.fit(x_nb, y[:,i])
+            self._clf[i] = LogisticRegression(C=self.C, solver=self.solver, n_jobs=self.n_jobs, max_iter=MAX_ITER).fit(x_nb, y[:,i])
 
         return self
 
